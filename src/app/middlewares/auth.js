@@ -6,6 +6,9 @@ import authConfig from '../../config/authConfig';
 export default async (req, res, next) => {
   const token = req.headers.authorization;
 
+  if (!token) {
+    res.status(400).json({ error: 'Token not found' });
+  }
   const [, header] = token.split(' ');
   try {
     const payload = await promisify(jwt.verify)(header, authConfig.secret);
