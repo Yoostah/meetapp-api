@@ -73,7 +73,7 @@ class UserController {
       return res.status(400).json({ error: 'User does not exists!' });
     }
 
-    const { name, email } = User.update(req.body);
+    const { name, email } = await User.update(req.body);
 
     return res.json({ name, email });
   }
