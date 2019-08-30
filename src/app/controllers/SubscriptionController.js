@@ -95,7 +95,17 @@ class SubscriptionController {
       where: {
         user_id: req.userId,
       },
-      include: [Meetup],
+      include: [
+        {
+          model: Meetup,
+          where: {
+            schedule: {
+              [Op.gt]: new Date(),
+            },
+          },
+          order: ['schedule', 'DESC'],
+        },
+      ],
     });
     return res.send(sub);
   }
