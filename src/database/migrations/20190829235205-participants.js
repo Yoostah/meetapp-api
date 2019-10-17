@@ -21,7 +21,8 @@ module.exports = {
           model: 'meetups',
           key: 'id',
         },
-
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
         allowNull: false,
       },
 

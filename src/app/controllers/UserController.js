@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import User from '../models/User';
+import File from '../models/File';
 
 class UserController {
   async store(req, res) {
@@ -10,72 +11,74 @@ class UserController {
         .required(),
       password: Yup.string()
         .required()
-        .min(8),
+        .min(6),
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+      return res.status(400).json({ error: 'Validation Fails' });
     }
 
     const userExists = await User.findOne({ where: { email: req.body.email } });
 
     if (userExists) {
-      return res.status(400).json({ error: 'User alredy exists!' });
+      return res.status(400).json({ error: 'User already exists.' });
     }
 
     const { id, name, email } = await User.create(req.body);
 
-    return res.json({ id, name, email });
-  }
-
-  async index(req, res) {
-    const user = await User.findAll({
-      attributes: ['id', 'name', 'email'],
+    return res.json({
+      id,
+      name,
+      email,
     });
-
-    return res.json(user);
-  }
-
-  async show(req, res) {
-    const user = await User.findOne({
-      where: { email: req.body.email },
-      attributes: ['id', 'name', 'email'],
-    });
-    return res.json(user);
   }
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string()
-        .email()
-        .required(),
-      oldPassword: Yup.string().min(8),
+      name: Yup.string(),
+      email: Yup.string().email(),
+      old_password: Yup.string().min(6),
       password: Yup.string()
-        .min(8)
-        .when('oldPassword', (oldPassword, field) =>
-          oldPassword ? field.required() : field
+        .min(6)
+        .when('old_password', (old_password, field) =>
+          old_password ? field.required() : field
         ),
-      confirmPassword: Yup.string()
-        .min(8)
-        .when('password', (password, field) =>
-          password ? field.required().oneOf([Yup.ref('password')]) : field
-        ),
+      confirm_password: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+      return res.status(400).json({ error: 'Validation Fails' });
+    }
+    const { email, old_password } = req.body;
+
+    const user = await User.findByPk(req.userId);
+    // const user = await User.findOne({ where: { email } });
+
+    if (email !== user.email) {
+      const userExists = await User.findOne({ where: { email } });
+      if (userExists) {
+        return res.status(400).json({ error: 'User already exists.' });
+      }
     }
 
-    const userExists = await User.findOne({ where: { email: req.body.email } });
-
-    if (!userExists) {
-      return res.status(400).json({ error: 'User does not exists!' });
+    if (old_password && !(await user.checkPassword(old_password))) {
+      return res.status(401).json({ error: 'Password does not match' });
     }
 
-    const { name, email } = await User.update(req.body);
+    await user.update(req.body);
 
-    return res.json({ name, email });
+    const { id, name, avatar } = await User.findByPk(req.userId, {
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
+    return res.json({ id, name, email, avatar });
   }
 }
 
