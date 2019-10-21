@@ -28,7 +28,7 @@ class Meetup extends Model {
     this.hasMany(models.Subscription, {
       foreignKey: 'meetup_id',
     });
-    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'owner' });
     this.belongsTo(models.File, {
       foreignKey: 'banner_id',
       as: 'meetup_banner',
