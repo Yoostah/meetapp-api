@@ -9,6 +9,7 @@ import {
 } from 'date-fns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class MeetupController {
   async store(req, res) {
@@ -81,6 +82,7 @@ class MeetupController {
               endOfDay(parseISO(date)),
             ],
           },
+          user_id: req.userId,
         },
         offset: (page - 1) * 10,
         limit: 10,
@@ -98,6 +100,7 @@ class MeetupController {
           schedule: {
             [Op.gte]: startOfToday(),
           },
+          user_id: req.userId,
         },
         offset: (page - 1) * 10,
         limit: 10,
@@ -111,6 +114,32 @@ class MeetupController {
       });
     }
     return res.json(meetups);
+  }
+
+  async info(req, res) {
+    const meetup = await Meetup.findOne({
+      where: {
+        id: req.params.id,
+      },
+      include: [
+        {
+          model: User,
+          as: 'owner',
+          attributes: ['name'],
+        },
+        {
+          model: File,
+          as: 'meetup_banner',
+          attributes: ['id', 'path', 'url'],
+        },
+      ],
+    });
+
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup Not found!' });
+    }
+
+    return res.json(meetup);
   }
 
   async delete(req, res) {

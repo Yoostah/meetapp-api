@@ -23,6 +23,7 @@ route.put('/users', UserController.update);
 route.post('/files', upload.single('file'), FileController.store);
 
 route.get('/meetup', MeetupController.show);
+route.get('/meetup/:id', MeetupController.info);
 route.post('/meetup', MeetupController.store);
 route.put('/meetup/:id', MeetupController.update);
 route.delete('/meetup/:id', MeetupController.delete);
