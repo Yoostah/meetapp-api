@@ -18,6 +18,7 @@ class MeetupController {
       description: Yup.string().required(),
       location: Yup.string().required(),
       schedule: Yup.date().required(),
+      banner_id: Yup.string().required(),
     });
 
     if (!schema.isValid()) {
@@ -90,7 +91,7 @@ class MeetupController {
           {
             model: User,
             as: 'owner',
-            attributes: ['name'],
+            attributes: ['name', 'email'],
           },
         ],
       });
@@ -102,13 +103,14 @@ class MeetupController {
           },
           user_id: req.userId,
         },
+        order: [['schedule', 'ASC']],
         offset: (page - 1) * 10,
         limit: 10,
         include: [
           {
             model: User,
             as: 'owner',
-            attributes: ['name'],
+            attributes: ['name', 'email'],
           },
         ],
       });
@@ -125,7 +127,7 @@ class MeetupController {
         {
           model: User,
           as: 'owner',
-          attributes: ['name'],
+          attributes: ['name', 'email'],
         },
         {
           model: File,
