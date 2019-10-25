@@ -30,4 +30,6 @@ route.delete('/meetup/:id', MeetupController.delete);
 
 route.post('/subscription', SubscriptionController.store);
 route.get('/subscription', SubscriptionController.show);
+route.delete('/subscription/:id', SubscriptionController.delete);
+
 export default route;

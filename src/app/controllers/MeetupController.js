@@ -83,7 +83,6 @@ class MeetupController {
               endOfDay(parseISO(date)),
             ],
           },
-          user_id: req.userId,
         },
         offset: (page - 1) * 10,
         limit: 10,
@@ -92,6 +91,11 @@ class MeetupController {
             model: User,
             as: 'owner',
             attributes: ['name', 'email'],
+          },
+          {
+            model: File,
+            as: 'meetup_banner',
+            attributes: ['id', 'path', 'url'],
           },
         ],
       });
@@ -111,6 +115,11 @@ class MeetupController {
             model: User,
             as: 'owner',
             attributes: ['name', 'email'],
+          },
+          {
+            model: File,
+            as: 'meetup_banner',
+            attributes: ['id', 'path', 'url'],
           },
         ],
       });

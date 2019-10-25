@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 import Mail from '../../lib/Mail';
 
 class SubscriptionController {
@@ -103,12 +104,55 @@ class SubscriptionController {
               [Op.gt]: new Date(),
             },
           },
-          order: ['schedule', 'DESC'],
+          attributes: [
+            'id',
+            'past',
+            'title',
+            'description',
+            'location',
+            'schedule',
+          ],
+          include: [
+            {
+              model: File,
+              as: 'meetup_banner',
+              attributes: ['path'],
+            },
+            {
+              model: User,
+              as: 'owner',
+              attributes: ['name', 'email'],
+            },
+          ],
         },
       ],
+      attributes: ['id'],
+      order: [[Meetup, 'schedule', 'asc']],
     });
     return res.send(sub);
   }
-}
 
+  async delete(req, res) {
+    const { id } = req.params;
+
+    const sub = await Subscription.findByPk(id);
+
+    if (!sub) {
+      return res.status(400).json({ error: 'Subscription not found!' });
+    }
+
+    /**
+     * check if the user is thw owner of the subscription
+     */
+    if (req.userId !== sub.user_id) {
+      return res
+        .status(400)
+        .json({ error: 'You can only unsubscribe to your own subscriptions!' });
+    }
+
+    await sub.destroy();
+
+    return res.json();
+  }
+}
 export default new SubscriptionController();
