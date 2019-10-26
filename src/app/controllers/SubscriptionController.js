@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
-import { isBefore } from 'date-fns';
+import { isBefore, format, parseISO } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
@@ -81,12 +82,28 @@ class SubscriptionController {
       user_id: req.userId,
       meetup_id: req.body.meetup_id,
     });
+
     const user = await User.findByPk(req.userId);
+
+    const formattedDate = format(
+      meetup.schedule,
+      "d 'de' MMMM ', às' HH:mm'h'",
+      {
+        locale: pt,
+      }
+    );
 
     await Mail.sendMail({
       to: `${meetup.owner.name} <${meetup.owner.email}>`,
-      subject: 'Mais um inscrito para o seu Meetup',
-      text: `o Usuário ${user.name} acabou de se cadastrar no seu Meetup =)`,
+      subject: `Houve uma inscrição no Evento ${meetup.title}`,
+      template: 'subscription',
+      context: {
+        owner: meetup.owner.name,
+        title: meetup.title,
+        date: formattedDate,
+        user: user.name,
+        email: user.email,
+      },
     });
     return res.send(subscription);
   }

@@ -48,7 +48,7 @@ class SessionController {
         avatar,
       },
       token: jwt.sign({ id }, authConfig.secret, {
-        expiresIn: authConfig.expiration,
+        expiresIn: authConfig.expiresIn,
       }),
     });
   }
