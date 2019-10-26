@@ -11,13 +11,12 @@ import SubscriptionController from './app/controllers/SubscriptionController';
 
 const route = new Router();
 const upload = multer(multerConfig);
-/* Rotas Usuário */
+
 route.post('/users', UserController.store);
 route.post('/session', SessionController.store);
 
 route.use(AuthMiddlleware);
 
-// route.get('/users', UserController.index);
 route.put('/users', UserController.update);
 
 route.post('/files', upload.single('file'), FileController.store);

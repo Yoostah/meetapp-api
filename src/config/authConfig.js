@@ -1,4 +1,4 @@
 export default {
-  secret: 'Canada2021',
-  expiration: '1d',
+  secret: process.env.APP_SECRET,
+  expiresIn: process.env.TOKEN_EXPIRATION,
 };
